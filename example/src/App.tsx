@@ -5,7 +5,6 @@
 import React, { useState, useCallback } from 'react';
 import {
   Image,
-  SegmentedControlIOS,
   StyleSheet,
   Platform,
   Switch,
@@ -14,19 +13,40 @@ import {
   SafeAreaView,
   Dimensions,
 } from 'react-native';
+import SegmentedControl from '@react-native-community/segmented-control'; // Note: SegmentedControl does not yet support Fabric
 
-import { BlurView, VibrancyView, BlurViewProps } from '@react-native-community/blur';
+import {
+  BlurView,
+  VibrancyView,
+  BlurViewProps,
+} from '@react-native-community/blur';
+
+const blurTypeValues =
+  Platform.OS === 'ios'
+    ? ['xlight', 'light', 'dark', 'regular', 'prominent']
+    : ['xlight', 'light', 'dark'];
 
 const Blurs = () => {
-  const [blurBlurType, setBlurBlurType] = useState<BlurViewProps['blurType']>('light');
+  const [blurBlurType, setBlurBlurType] =
+    useState<BlurViewProps['blurType']>('light');
   const [blurActiveSegment, setBlurActiveSegment] = useState(1);
-  const [vibrancyBlurType, setVibrancyBlurType] = useState<BlurViewProps['blurType']>('dark');
+  const [vibrancyBlurType, setVibrancyBlurType] =
+    useState<BlurViewProps['blurType']>('dark');
   const [vibrancyActiveSegment, setVibrancyActiveSegment] = useState(2);
 
-  const onBlurChange = useCallback((e) => setBlurActiveSegment(e.nativeEvent.selectedSegmentIndex), []);
+  const onBlurChange = useCallback(
+    (e) => setBlurActiveSegment(e.nativeEvent.selectedSegmentIndex),
+    []
+  );
   const onBlurValueChange = useCallback((value) => setBlurBlurType(value), []);
-  const onVibrancyChange = useCallback((e) => setVibrancyActiveSegment(e.nativeEvent.selectedSegmentIndex), []);
-  const onVibrancyValueChange = useCallback((value) => setVibrancyBlurType(value), []);
+  const onVibrancyChange = useCallback(
+    (e) => setVibrancyActiveSegment(e.nativeEvent.selectedSegmentIndex),
+    []
+  );
+  const onVibrancyValueChange = useCallback(
+    (value) => setVibrancyBlurType(value),
+    []
+  );
 
   const tintColor = blurBlurType === 'xlight' ? 'black' : 'white';
   const platform = Platform.OS === 'ios' ? 'iOS' : 'Android';
@@ -44,24 +64,22 @@ const Blurs = () => {
           blurType={blurBlurType}
           blurAmount={100}
           reducedTransparencyFallbackColor={'pink'}
-          style={[styles.blurView]}>
-          <Text style={[styles.text, { color: tintColor }]}>
-            Blur component ({platform})
-          </Text>
-          {Platform.OS === 'ios' && (
-            <SegmentedControlIOS
-              values={['xlight', 'light', 'dark', 'regular', 'prominent']}
-              selectedIndex={blurActiveSegment}
-              onChange={(event) => {
-                onBlurChange(event);
-              }}
-              onValueChange={(value) => {
-                onBlurValueChange(value);
-              }}
-              tintColor={tintColor}
-            />
-          )}
-        </BlurView>
+          style={[styles.blurView]}
+        />
+        <Text style={[styles.text, { color: tintColor }]}>
+          Blur component ({platform})
+        </Text>
+        <SegmentedControl
+          values={blurTypeValues}
+          selectedIndex={blurActiveSegment}
+          onChange={(event) => {
+            onBlurChange(event);
+          }}
+          onValueChange={(value) => {
+            onBlurValueChange(value);
+          }}
+          tintColor={tintColor}
+        />
       </View>
 
       {
@@ -69,16 +87,17 @@ const Blurs = () => {
           VibrancyView is only supported on iOS, and must contain child views,
           otherwise the vibrancy effect doesn't work.
         */
-        Platform.OS === 'ios' && (
+        Platform.OS === 'ios' ? (
           <VibrancyView
             blurType={vibrancyBlurType}
             blurAmount={10}
             reducedTransparencyFallbackColor={'pink'}
-            style={[styles.container, styles.blurContainer]}>
+            style={[styles.container, styles.blurContainer]}
+          >
             <Text style={styles.text}>Vibrancy component (iOS-only)</Text>
 
-            <SegmentedControlIOS
-              values={['xlight', 'light', 'dark', 'regular', 'prominent']}
+            <SegmentedControl
+              values={blurTypeValues}
               selectedIndex={vibrancyActiveSegment}
               onChange={(event) => {
                 onVibrancyChange(event);
@@ -89,11 +108,11 @@ const Blurs = () => {
               tintColor="white"
             />
           </VibrancyView>
-        )
+        ) : null
       }
     </SafeAreaView>
   );
-}
+};
 
 const Example = () => {
   const [showBlurs, setShowBlurs] = React.useState(true);
@@ -115,8 +134,8 @@ const Example = () => {
         />
       </SafeAreaView>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
